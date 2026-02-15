@@ -3,51 +3,74 @@ requires = ["maturin>=1.7"]
 build-backend = "maturin"
 
 [project]
-name = "cellforge"
+name = "genunity"
 version = "0.1.0"
-description = "Genome-agnostic whole-cell simulation engine"
+description = "Unified platform for gene discovery, whole-cell simulation, and crowdfunded open research"
 requires-python = ">=3.11"
 license = "Apache-2.0"
 dependencies = [
-    "numpy",
-    "scipy",
-    "cobra",
-    "biopython",
-    "gillespy2",
-    "fastapi",
-    "uvicorn",
-    "websockets",
-    "redis",
-    "pydantic>=2.0",
-    "rich",
-    "typer",
-    "httpx",
-    "pyarrow",
-    "zarr",
-    "h5py",
-    "torch",
-    "transformers",
-    "equilibrator-api",
+    # Core scientific
+    "numpy>=1.24",
+    "scipy>=1.11",
+    "biopython>=1.84",
+    # Web framework
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.34",
+    "websockets>=14.0",
+    "httpx>=0.28",
+    "pydantic>=2.10",
+    "pydantic-settings>=2.3",
+    "python-multipart>=0.0.9",
+    # Database
     "sqlalchemy[asyncio]>=2.0",
     "asyncpg",
-    "alembic",
+    "alembic>=1.13",
+    # Auth & payments
     "stripe",
     "python-jose[cryptography]",
+    # CLI
+    "typer[all]>=0.12",
+    "rich>=13.7",
+    # Data formats
+    "pyarrow>=14.0",
+    "zarr>=2.16",
+    "h5py>=3.10",
+    "pyyaml>=6.0",
+    # Async utilities
+    "asyncio-throttle>=1.0",
+    # Simulation engine deps
+    "cobra>=0.29",
+    "gillespy2>=1.8",
+    "redis>=5.0",
+    "equilibrator-api>=0.4",
 ]
 
 [project.optional-dependencies]
 jax = ["jax", "jaxlib"]
 gpu = ["torch"]
+ml = ["torch>=2.0", "transformers>=4.30"]
+llm = ["openai>=1.0"]
+postgres = ["psycopg2-binary>=2.9"]
+pipelines = ["dagster>=1.7", "dagster-webserver>=1.7"]
+validation = ["libroadrunner>=2.4", "matplotlib>=3.7", "pandas>=2.0"]
+dashboard = [
+    "streamlit>=1.30",
+    "pycirclize>=1.0",
+    "plotly>=5.0",
+    "streamlit-molstar>=0.8",
+]
 dev = [
-    "pytest",
-    "pytest-asyncio",
-    "ruff",
-    "mypy",
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=5.0",
+    "ruff>=0.8",
+    "mypy>=1.8",
     "maturin>=1.7",
 ]
 
 [project.scripts]
 cellforge = "cellforge.cli.main:app"
+biolab = "biolab.cli.main:app"
 
 [tool.maturin]
 python-source = "src"
@@ -57,16 +80,20 @@ manifest-path = "crates/cellforge-engine/Cargo.toml"
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+src = ["src"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "W", "UP"]
+select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.mypy]
 python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = true
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+
+[tool.dagster]
+module_name = "biolab.pipelines.definitions"
