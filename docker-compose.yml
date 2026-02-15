@@ -1,0 +1,57 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=cellforge
+      - POSTGRES_PASSWORD=cellforge
+      - POSTGRES_DB=cellforge
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cellforge"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  cellforge:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8420:8420"
+      - "5173:5173"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql+asyncpg://cellforge:cellforge@postgres:5432/cellforge
+      - CELLFORGE_HOST=0.0.0.0
+      - CELLFORGE_PORT=8420
+      - CLERK_JWKS_URL=${CLERK_JWKS_URL:-}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
+      - STRIPE_PRICE_ID=${STRIPE_PRICE_ID:-}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
+    volumes:
+      - ./output:/app/output
+
+volumes:
+  redis-data:
+  pg-data:
