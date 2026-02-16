@@ -1,48 +1,37 @@
-"""Shared test fixtures."""
-
-from __future__ import annotations
-
 import pytest
+from sqlalchemy import create_engine, event
+from sqlalchemy.orm import Session, sessionmaker
 
-from cellforge.core.config import SimulationConfig
-from cellforge.core.knowledge_base import Gene, KnowledgeBase, Metabolite, Reaction
-from cellforge.core.simulation import Simulation
+from biolab.db.models import Base
 
-
-@pytest.fixture
-def default_config() -> SimulationConfig:
-    """A default simulation configuration."""
-    return SimulationConfig()
+# Use SQLite for tests -- fast, no PG dependency needed
+TEST_DATABASE_URL = "sqlite://"
 
 
-@pytest.fixture
-def m_genitalium_kb() -> KnowledgeBase:
-    """A minimal M. genitalium knowledge base stub."""
-    return KnowledgeBase(
-        organism="Mycoplasma genitalium",
-        genome_length=580076,
-        gc_content=0.315,
-        genes=[
-            Gene(id="MG_001", name="dnaN", locus_tag="MG_001", start=1, end=1500, strand=1),
-            Gene(id="MG_002", name="dnaA", locus_tag="MG_002", start=1501, end=3000, strand=1),
-        ],
-        metabolites=[
-            Metabolite(id="atp_c", name="ATP", compartment="cytoplasm"),
-            Metabolite(id="adp_c", name="ADP", compartment="cytoplasm"),
-            Metabolite(id="glc_D_e", name="D-Glucose", compartment="extracellular"),
-        ],
-        reactions=[
-            Reaction(
-                id="PFK",
-                name="Phosphofructokinase",
-                reactants={"atp_c": 1.0, "f6p_c": 1.0},
-                products={"adp_c": 1.0, "fdp_c": 1.0},
-            ),
-        ],
-    )
+@pytest.fixture(scope="session")
+def engine():
+    eng = create_engine(TEST_DATABASE_URL)
+
+    # SQLite needs explicit FK enforcement
+    @event.listens_for(eng, "connect")
+    def set_sqlite_pragma(dbapi_connection, connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
+    Base.metadata.create_all(eng)
+    yield eng
+    Base.metadata.drop_all(eng)
 
 
-@pytest.fixture
-def m_genitalium_sim(default_config: SimulationConfig, m_genitalium_kb: KnowledgeBase) -> Simulation:
-    """A minimal M. genitalium simulation stub."""
-    return Simulation.from_knowledge_base(m_genitalium_kb, default_config)
+@pytest.fixture()
+def db(engine) -> Session:
+    connection = engine.connect()
+    transaction = connection.begin()
+    session = sessionmaker(bind=connection)()
+
+    yield session
+
+    session.close()
+    transaction.rollback()
+    connection.close()

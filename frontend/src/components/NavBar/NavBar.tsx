@@ -1,60 +1,48 @@
-import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react';
-import { Link } from 'react-router-dom';
-import { TokenBalance } from '../Tokens/TokenBalance';
+import { Link } from "react-router-dom";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+} from "@clerk/clerk-react";
+import { TokenBalance } from "../Tokens/TokenBalance";
+import { hasClerk } from "../../hooks/useClerk";
 
 export function NavBar() {
   return (
-    <nav
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 20px',
-        height: 56,
-        background: '#1a1a2e',
-        borderBottom: '1px solid #333',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-        <Link to="/" style={{ fontSize: 18, fontWeight: 700, color: '#7c3aed' }}>
-          CellForge
+    <header className="navbar">
+      <div className="navbar-left">
+        <Link to="/" className="navbar-logo">
+          Genunity
         </Link>
-        <Link to="/" style={{ color: '#aaa', fontSize: 14 }}>
-          Research
-        </Link>
-        <SignedIn>
-          <Link to="/simulator" style={{ color: '#aaa', fontSize: 14 }}>
-            Simulator
-          </Link>
-          <Link to="/tokens" style={{ color: '#aaa', fontSize: 14 }}>
-            Tokens
-          </Link>
-        </SignedIn>
+        <nav className="navbar-links">
+          <Link to="/">Research</Link>
+          {hasClerk ? (
+            <SignedIn>
+              <Link to="/genomes">Simulator</Link>
+              <Link to="/tokens">Tokens</Link>
+            </SignedIn>
+          ) : (
+            <Link to="/genomes">Simulator</Link>
+          )}
+        </nav>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <SignedIn>
-          <TokenBalance />
-          <UserButton />
-        </SignedIn>
-        <SignedOut>
-          <SignInButton mode="modal">
-            <button
-              style={{
-                background: '#7c3aed',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 6,
-                padding: '8px 16px',
-                cursor: 'pointer',
-                fontSize: 14,
-              }}
-            >
-              Sign In
-            </button>
-          </SignInButton>
-        </SignedOut>
+      <div className="navbar-right">
+        {hasClerk && (
+          <>
+            <SignedIn>
+              <TokenBalance />
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="navbar-signin-btn">Sign In</button>
+              </SignInButton>
+            </SignedOut>
+          </>
+        )}
       </div>
-    </nav>
+    </header>
   );
 }

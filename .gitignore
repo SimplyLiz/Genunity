@@ -1,43 +1,53 @@
-# Rust
-target/
-*.rs.bk
-
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-*.pyd
 *.egg-info/
 dist/
 build/
-.eggs/
 .venv/
 venv/
-*.whl
+
+# Rust
+/target/
+*.so
+*.pyd
+
+# DB
+*.db
+*.sqlite3
+
+# Environment
+.env
+.env.local
+.env.*.local
 
 # Node
 node_modules/
 frontend/dist/
+frontend/src/**/*.js
+frontend/tsconfig.tsbuildinfo
 
-# Environment
-.env
-.env.*
+# CKB
+.ckb/
 
 # IDE
 .idea/
 .vscode/
 *.swp
-*.swo
+
+# ETL / data cache
+etl_cache/
+*.zip
+
+# Test / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Logs
+*.log
 
 # OS
 .DS_Store
 Thumbs.db
-
-# Docker
-docker-compose.override.yml
-
-# Data
-*.h5
-*.hdf5
-*.zarr/

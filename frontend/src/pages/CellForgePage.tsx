@@ -1,7 +1,7 @@
-import { PetriDish } from '@/components/PetriDish/PetriDish';
-import { Dashboard } from '@/components/Dashboard/Dashboard';
-import { Toolbar } from '@/components/Toolbar/Toolbar';
-import { GenomeBrowser } from '@/components/GenomeBrowser/GenomeBrowser';
+import { PetriDish } from '@/components/cellforge/PetriDish/PetriDish';
+import { Dashboard } from '@/components/cellforge/Dashboard/Dashboard';
+import { Toolbar } from '@/components/cellforge/Toolbar/Toolbar';
+import { GenomeBrowser } from '@/components/cellforge/GenomeBrowser/GenomeBrowser';
 
 export function CellForgePage() {
   return (

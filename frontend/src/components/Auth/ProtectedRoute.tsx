@@ -1,21 +1,25 @@
-import { useAuth } from '@clerk/clerk-react';
-import { Navigate } from 'react-router-dom';
-import type { ReactNode } from 'react';
+import { useAuth, RedirectToSignIn } from "@clerk/clerk-react";
+import { hasClerk } from "../../hooks/useClerk";
 
-export function ProtectedRoute({ children }: { children: ReactNode }) {
+function ClerkGuard({ children }: { children: React.ReactNode }) {
   const { isSignedIn, isLoaded } = useAuth();
 
   if (!isLoaded) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#aaa' }}>
-        Loading...
-      </div>
-    );
+    return <div className="auth-loading">Loading...</div>;
   }
 
   if (!isSignedIn) {
-    return <Navigate to="/sign-in" replace />;
+    return <RedirectToSignIn />;
   }
 
   return <>{children}</>;
+}
+
+export function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  if (!hasClerk) {
+    // No Clerk configured — allow access (dev mode)
+    return <>{children}</>;
+  }
+
+  return <ClerkGuard>{children}</ClerkGuard>;
 }

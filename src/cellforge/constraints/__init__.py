@@ -1,1 +1,0 @@
-"""Thermodynamic and physical constraints."""

@@ -10,6 +10,7 @@ from biolab.db.models.hypothesis import (
     EvidenceDirection,
 )
 from biolab.db.models.api_usage import APIUsageLog
+from biolab.db.models.platform import User, TokenTransaction, SimulationRun
 
 __all__ = [
     "Base",
@@ -25,4 +26,7 @@ __all__ = [
     "HypothesisStatus",
     "EvidenceDirection",
     "APIUsageLog",
+    "User",
+    "TokenTransaction",
+    "SimulationRun",
 ]

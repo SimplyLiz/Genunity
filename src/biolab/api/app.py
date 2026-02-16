@@ -31,6 +31,13 @@ async def lifespan(app: FastAPI):
     yield
     await app.state.http.aclose()
 
+    # Dispose async engine (platform PostgreSQL)
+    try:
+        from biolab.db.async_engine import dispose_async_engine
+        await dispose_async_engine()
+    except Exception:
+        pass
+
 
 def create_app() -> FastAPI:
     """Application factory — returns configured FastAPI instance."""
@@ -41,9 +48,12 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    import os
+    frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=config.cors_origins,
+        allow_origins=[*config.cors_origins, frontend_url],
+        allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )

@@ -31,3 +31,14 @@ cellforge_router.include_router(cf_sim_router)
 cellforge_router.include_router(cf_ann_router)
 cellforge_router.include_router(cf_health_router)
 router.include_router(cellforge_router)
+
+# Platform routes (auth, tokens, payments, public research feed)
+from biolab.api.v1.auth import router as auth_router
+from biolab.api.v1.tokens import router as tokens_router
+from biolab.api.v1.payments import router as payments_router
+from biolab.api.v1.public import router as public_router
+
+router.include_router(auth_router)
+router.include_router(tokens_router)
+router.include_router(payments_router)
+router.include_router(public_router)

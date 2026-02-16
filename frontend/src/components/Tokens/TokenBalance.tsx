@@ -1,30 +1,24 @@
-import { useEffect } from 'react';
-import { useAuth } from '@clerk/clerk-react';
-import { useAuthStore } from '../../stores/authStore';
+import { useEffect } from "react";
+import { useAuth } from "@clerk/clerk-react";
+import { useAuthStore } from "../../stores/authStore";
+import { hasClerk } from "../../hooks/useClerk";
 
-export function TokenBalance() {
+function ClerkTokenBalance() {
   const { getToken } = useAuth();
-  const { tokenBalance, isLoadingBalance, fetchBalance } = useAuthStore();
+  const { tokenBalance, loading, fetchBalance } = useAuthStore();
 
   useEffect(() => {
     fetchBalance(getToken);
-  }, [fetchBalance, getToken]);
+  }, [getToken, fetchBalance]);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
-        background: '#2a2a3e',
-        padding: '4px 12px',
-        borderRadius: 20,
-        fontSize: 13,
-        color: '#c4b5fd',
-      }}
-    >
-      <span>🧪</span>
-      <span>{isLoadingBalance ? '...' : tokenBalance}</span>
-    </div>
+    <span className="token-balance" title="Research tokens">
+      {loading ? "..." : tokenBalance} tokens
+    </span>
   );
+}
+
+export function TokenBalance() {
+  if (!hasClerk) return null;
+  return <ClerkTokenBalance />;
 }

@@ -1,30 +1,32 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
-interface AuthStore {
+interface AuthState {
   tokenBalance: number;
-  isLoadingBalance: boolean;
+  loading: boolean;
   fetchBalance: (getToken: () => Promise<string | null>) => Promise<void>;
 }
 
-export const useAuthStore = create<AuthStore>((set) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   tokenBalance: 0,
-  isLoadingBalance: false,
+  loading: false,
 
   fetchBalance: async (getToken) => {
-    set({ isLoadingBalance: true });
+    set({ loading: true });
     try {
       const token = await getToken();
       if (!token) return;
 
-      const res = await fetch('/api/v1/tokens/balance', {
+      const res = await fetch("/api/v1/tokens/balance", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
         const data = await res.json();
         set({ tokenBalance: data.balance });
       }
+    } catch {
+      // silently fail — balance stays at last known value
     } finally {
-      set({ isLoadingBalance: false });
+      set({ loading: false });
     }
   },
 }));
